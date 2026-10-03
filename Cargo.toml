@@ -1,0 +1,46 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/a9boot-core",
+    "crates/a9boot-host",
+    "crates/a9boot-payload",
+]
+
+# The payload crate is a bare-metal aarch64 binary: it cannot be built for the
+# host target, and it needs a rustup target that is NOT installed on this box
+# (see DESIGN.md §7.4). Keeping it out of default-members means a plain
+# `cargo test` exercises everything that *can* be built and tested here, and the
+# payload is built only by an explicit `--target aarch64-unknown-none-softfloat`.
+default-members = [
+    "crates/a9boot-core",
+    "crates/a9boot-host",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+
+[profile.release]
+# Host defaults: usable stacks matter more than size here.
+opt-level = 2
+debug = true
+
+# The payload profile. `panic` and `lto` can only be set at the workspace root, which is why
+# this lives here rather than in the payload's own manifest.
+#
+#   cargo build -p a9boot-payload --profile payload --target aarch64-unknown-none-softfloat
+#
+# `panic = "abort"` is mandatory for a no_std binary. The size knobs matter because the payload
+# travels inside a command transfer, and its footprint is checked against
+# `a9boot_core::layout::PAYLOAD_MAX_FOOTPRINT` before anything is uploaded.
+[profile.payload]
+inherits = "release"
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = false
+strip = true
+overflow-checks = false
+debug-assertions = false

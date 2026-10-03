@@ -1,0 +1,15 @@
+[package]
+name = "a9boot-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Shared, no_std truth for a9boot: layout, Image header, channel ABI, plan"
+
+# Deliberately zero dependencies. This crate is compiled for both the host
+# (x86_64-pc-windows-msvc, where it is unit-tested) and the on-device payload
+# (aarch64-unknown-none-softfloat), so it must not pull anything in.
+[dependencies]
+
+[lib]
+name = "a9boot_core"
+path = "src/lib.rs"

@@ -1,0 +1,27 @@
+[package]
+name = "a9boot-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "a9boot host side: plan, device-tree edit, command codec, uploader"
+
+[dependencies]
+a9boot-core = { path = "../a9boot-core" }
+
+# APPROVED by the Lead as a NON-DEFAULT optional feature, matching a9pwn's version.
+# The default build has NO USB capability AT ALL: with this feature off there is no code path
+# in this crate that can open a device, which is the point. Real device access is Lead-only
+# regardless of the feature (HANDOFF §9.1).
+rusb = { version = "0.9", optional = true }
+
+[features]
+default = []
+usb = ["dep:rusb"]
+
+[[bin]]
+name = "a9boot-host"
+path = "src/main.rs"
+
+[lib]
+name = "a9boot_host"
+path = "src/lib.rs"

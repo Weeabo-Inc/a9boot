@@ -1,0 +1,29 @@
+[package]
+name = "a9boot-payload"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "a9boot on-device payload: the EL3 trampoline that hands control to Linux"
+
+# Shared truth with the host. Compiled for aarch64-unknown-none-softfloat.
+[dependencies]
+a9boot-core = { path = "../a9boot-core" }
+
+# The linker script is generated from a9boot-core::layout so the payload's link address and the
+# host's `abi::payload_exec_addr()` cannot drift apart. The build script runs on the host, so a
+# no_std library is a legitimate build-dependency.
+[build-dependencies]
+a9boot-core = { path = "../a9boot-core" }
+
+[[bin]]
+name = "a9boot-payload"
+path = "src/main.rs"
+
+# `panic = "abort"` is required for a no_std binary (there is no unwinder and no personality
+# routine), and the size knobs matter because the payload is delivered inside a command
+# transfer. Build it as:
+#
+#   cargo build -p a9boot-payload --profile payload --target aarch64-unknown-none-softfloat
+#
+# The profile itself lives in the workspace root, because cargo only allows `panic` and `lto`
+# to be set there.
